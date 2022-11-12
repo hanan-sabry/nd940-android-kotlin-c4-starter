@@ -3,6 +3,7 @@ package com.udacity.project4
 import android.app.Application
 import androidx.multidex.MultiDex
 import androidx.multidex.MultiDexApplication
+import com.udacity.project4.authentication.LoginViewModel
 import com.udacity.project4.locationreminders.data.ReminderDataSource
 import com.udacity.project4.locationreminders.data.local.LocalDB
 import com.udacity.project4.locationreminders.data.local.RemindersLocalRepository
@@ -28,6 +29,9 @@ class MyApp : MultiDexApplication() {
                     get(),
                     get() as ReminderDataSource
                 )
+            }
+            viewModel {
+                LoginViewModel(get())
             }
             //Declare singleton definitions to be later injected using by inject()
             single {
