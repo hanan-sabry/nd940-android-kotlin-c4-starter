@@ -125,6 +125,7 @@ class SelectLocationFragment : BaseFragment(), OnMapReadyCallback {
                     .title(poi.name)
             )
             poiMarker.showInfoWindow()
+            selectedLocation = poi.latLng
             selectedLocationStr = poi.name
         }
     }
@@ -218,12 +219,14 @@ class SelectLocationFragment : BaseFragment(), OnMapReadyCallback {
                 mMap.isMyLocationEnabled = false
             }
         }
-        getUserLastLocation()
+        locationSettingsResponseTask.addOnCompleteListener {
+            if ( it.isSuccessful ) {
+                getUserLastLocation()
+            }
+        }
     }
 
     private fun onLocationSelected() {
-        //        TODO: When the user confirms on the selected location,
-        //         send back the selected location details to the view model
         _viewModel.latitude.value = selectedLocation?.latitude
         _viewModel.longitude.value = selectedLocation?.longitude
         _viewModel.reminderSelectedLocationStr.value = selectedLocationStr
