@@ -51,14 +51,10 @@ class RemindersListViewModelTest {
     fun loadReminders_shouldReturnError() = runTest {
         //WHEN - An error occurs when retrieving reminders
         remindersDataSource.setShouldReturnError(true)
+        remindersListViewModel.loadReminders()
 
         //THEN - verify that an error occurred
-        val result: Result<List<ReminderDTO>> = remindersDataSource.getReminders()
-
-        assertThat(result, notNullValue())
-        assertThat(
-            result, `is`(Result.Error("Error while retrieving reminders"))
-        )
+        assertThat(remindersListViewModel.showSnackBar.value, `is` ("Error while retrieving reminders"))
     }
 
     @Test

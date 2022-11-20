@@ -12,14 +12,12 @@ import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.runBlocking
 import org.hamcrest.CoreMatchers.`is`
 import org.hamcrest.CoreMatchers.notNullValue
-import org.hamcrest.MatcherAssert
 import org.hamcrest.MatcherAssert.assertThat
 import org.junit.After
 import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
-import java.util.concurrent.Executors
 
 @ExperimentalCoroutinesApi
 @RunWith(AndroidJUnit4::class)
@@ -40,30 +38,29 @@ class RemindersLocalRepositoryTest {
         remindersDatabase = Room.inMemoryDatabaseBuilder(
             ApplicationProvider.getApplicationContext(),
             RemindersDatabase::class.java
-        ).setTransactionExecutor(Executors.newSingleThreadExecutor())
-            .build()
+        ).build()
 
         remindersDao = remindersDatabase.reminderDao()
-        remindersRepository = RemindersLocalRepository(remindersDao, Dispatchers.Main)
+        remindersRepository = RemindersLocalRepository(remindersDao)
         reminderDTO = getFakeReminderDTO()
     }
 
     @Test
     fun saveReminder_retrievesReminder() = runBlocking {
         //GIVEN - a new reminder saved in the database
-        remindersDao.saveReminder(getFakeReminderDTO())
+        remindersRepository.saveReminder(reminderDTO)
 
         //WHEN - Reminder is retrieved by id
         val result = remindersRepository.getReminder(reminderDTO.id)
 
         //THEN - same reminder is retrieved
         assertThat(result as Result.Success<ReminderDTO>, notNullValue())
-        assertThat(result.data.id, `is` (reminderDTO.id))
-        assertThat(result.data.title, `is` (reminderDTO.title))
-        assertThat(result.data.description, `is` (reminderDTO.description))
-        assertThat(result.data.location, `is` (reminderDTO.location))
-        assertThat(result.data.longitude, `is` (reminderDTO.longitude))
-        assertThat(result.data.latitude, `is` (reminderDTO.latitude))
+        assertThat(result.data.id, `is`(reminderDTO.id))
+        assertThat(result.data.title, `is`(reminderDTO.title))
+        assertThat(result.data.description, `is`(reminderDTO.description))
+        assertThat(result.data.location, `is`(reminderDTO.location))
+        assertThat(result.data.longitude, `is`(reminderDTO.longitude))
+        assertThat(result.data.latitude, `is`(reminderDTO.latitude))
     }
 
     @Test
@@ -73,7 +70,7 @@ class RemindersLocalRepositoryTest {
         val result = remindersRepository.getReminder("not found id")
 
         //THEN - error is returned
-        assertThat((result as Result.Error).message, `is` ("Reminder not found!"))
+        assertThat((result as Result.Error).message, `is`("Reminder not found!"))
     }
 
     @After
