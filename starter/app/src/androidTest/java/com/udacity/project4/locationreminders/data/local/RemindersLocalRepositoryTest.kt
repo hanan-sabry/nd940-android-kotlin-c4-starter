@@ -11,13 +11,15 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.runBlocking
 import org.hamcrest.CoreMatchers.`is`
-import org.hamcrest.CoreMatchers.instanceOf
+import org.hamcrest.CoreMatchers.notNullValue
+import org.hamcrest.MatcherAssert
 import org.hamcrest.MatcherAssert.assertThat
 import org.junit.After
 import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
+import java.util.concurrent.Executors
 
 @ExperimentalCoroutinesApi
 @RunWith(AndroidJUnit4::class)
@@ -25,6 +27,68 @@ import org.junit.runner.RunWith
 @MediumTest
 class RemindersLocalRepositoryTest {
 
-//    TODO: Add testing implementation to the RemindersLocalRepository.kt
+    private lateinit var remindersDatabase: RemindersDatabase
+    private lateinit var remindersDao: RemindersDao
+    private lateinit var reminderDTO: ReminderDTO
+    private lateinit var remindersRepository: RemindersLocalRepository
 
+    @get:Rule
+    var instantTaskExecutorRule = InstantTaskExecutorRule()
+
+    @Before
+    fun init() {
+        remindersDatabase = Room.inMemoryDatabaseBuilder(
+            ApplicationProvider.getApplicationContext(),
+            RemindersDatabase::class.java
+        ).setTransactionExecutor(Executors.newSingleThreadExecutor())
+            .build()
+
+        remindersDao = remindersDatabase.reminderDao()
+        remindersRepository = RemindersLocalRepository(remindersDao, Dispatchers.Main)
+        reminderDTO = getFakeReminderDTO()
+    }
+
+    @Test
+    fun saveReminder_retrievesReminder() = runBlocking {
+        //GIVEN - a new reminder saved in the database
+        remindersDao.saveReminder(getFakeReminderDTO())
+
+        //WHEN - Reminder is retrieved by id
+        val result = remindersRepository.getReminder(reminderDTO.id)
+
+        //THEN - same reminder is retrieved
+        assertThat(result as Result.Success<ReminderDTO>, notNullValue())
+        assertThat(result.data.id, `is` (reminderDTO.id))
+        assertThat(result.data.title, `is` (reminderDTO.title))
+        assertThat(result.data.description, `is` (reminderDTO.description))
+        assertThat(result.data.location, `is` (reminderDTO.location))
+        assertThat(result.data.longitude, `is` (reminderDTO.longitude))
+        assertThat(result.data.latitude, `is` (reminderDTO.latitude))
+    }
+
+    @Test
+    fun getReminder_ReturnDataNotFound() = runBlocking {
+        //GIVEN - get reminder by id not found in database
+        //WHEN - reminder is retrieved by id
+        val result = remindersRepository.getReminder("not found id")
+
+        //THEN - error is returned
+        assertThat((result as Result.Error).message, `is` ("Reminder not found!"))
+    }
+
+    @After
+    fun closeDB() {
+        remindersDatabase.close()
+    }
+
+
+    private fun getFakeReminderDTO(): ReminderDTO {
+        return ReminderDTO(
+            "Test reminder",
+            "Test description",
+            "test location",
+            33.23,
+            33.34
+        )
+    }
 }

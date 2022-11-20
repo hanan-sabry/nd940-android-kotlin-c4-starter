@@ -104,7 +104,7 @@ class SaveReminderFragment : BaseFragment() {
                 100f
             )
             .setTransitionTypes(Geofence.GEOFENCE_TRANSITION_ENTER)
-            .setExpirationDuration(TimeUnit.DAYS.toDays(30))
+            .setExpirationDuration(Geofence.NEVER_EXPIRE)
             .build()
         //build the geofence request
         val geofencingRequest = GeofencingRequest.Builder()
