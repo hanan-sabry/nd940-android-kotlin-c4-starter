@@ -78,6 +78,7 @@ class SaveReminderFragment : BaseFragment() {
                 longitude
             )
             if (_viewModel.validateEnteredData(reminderDataItem)) {
+
                 if (runningQorLater) {
                     requestBackgroundPermission()
                 } else {

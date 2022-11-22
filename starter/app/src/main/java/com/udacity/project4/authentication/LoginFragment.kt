@@ -25,20 +25,20 @@ class LoginFragment : BaseFragment() {
             this.onSignInResult(res)
         }
 
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+    }
+
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View {
+        observeAuthenticationState()
         val binding = FragmentLoginBinding.inflate(inflater)
         binding.login.setOnClickListener {
             launchSignInFlow()
         }
-//        observeAuthenticationState()
         return binding.root
-    }
-
-    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
-        super.onViewCreated(view, savedInstanceState)
     }
 
     private fun launchSignInFlow() {
@@ -78,12 +78,12 @@ class LoginFragment : BaseFragment() {
         }
     }
 
-//    private fun observeAuthenticationState() {
-//        _viewModel.authenticateState.observe(viewLifecycleOwner, Observer {
-//            if (it.equals(LoginViewModel.AuthenticateState.AUTHENTICATED)) {
-//                this.findNavController()
-//                    .navigate(LoginFragmentDirections.actionLoginFragmentToRemindersActivity())
-//            }
-//        })
-//    }
+    private fun observeAuthenticationState() {
+        _viewModel.authenticateState.observe(viewLifecycleOwner, Observer {
+            if (it.equals(LoginViewModel.AuthenticateState.AUTHENTICATED)) {
+                this.findNavController()
+                    .navigate(LoginFragmentDirections.actionLoginFragmentToRemindersActivity())
+            }
+        })
+    }
 }

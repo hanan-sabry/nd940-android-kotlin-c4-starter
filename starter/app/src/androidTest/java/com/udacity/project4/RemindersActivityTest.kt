@@ -13,6 +13,7 @@ import androidx.test.espresso.IdlingRegistry
 import androidx.test.espresso.action.ViewActions
 import androidx.test.espresso.action.ViewActions.click
 import androidx.test.espresso.assertion.ViewAssertions
+import androidx.test.espresso.assertion.ViewAssertions.matches
 import androidx.test.espresso.contrib.RecyclerViewActions
 import androidx.test.espresso.matcher.RootMatchers.withDecorView
 import androidx.test.espresso.matcher.ViewMatchers
@@ -147,9 +148,22 @@ class RemindersActivityTest :
         onView(withText(R.string.reminder_saved))
             .inRoot(withDecorView(not(decorView)))
             .check(ViewAssertions.matches(isDisplayed()))
-
         activityScenario.close()
-
     }
 
+    @Test
+    fun testErrorThenShowSnackMessage() = runBlocking {
+        val activityScenario = ActivityScenario.launch(RemindersActivity::class.java)
+        activityScenario.onActivity {
+
+        }
+        dataBindingIdlingResource.monitorActivity(activityScenario)
+        onView(withId(R.id.addReminderFAB)).perform(click())
+        runBlocking { delay(2000) }
+        onView(withId(R.id.saveReminder)).perform(click())
+        runBlocking { delay(2000) }
+        onView(withId(com.google.android.material.R.id.snackbar_text))
+            .check(matches(withText(R.string.err_enter_title)))
+        activityScenario.close()
+    }
 }

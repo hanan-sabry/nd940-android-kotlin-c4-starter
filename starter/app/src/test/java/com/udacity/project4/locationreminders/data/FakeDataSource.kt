@@ -34,17 +34,17 @@ class FakeDataSource(private var reminders: MutableList<ReminderDTO> = mutableLi
     }
 
     override suspend fun getReminder(id: String): Result<ReminderDTO> {
-        if (shouldReturnError) {
+        return if (!shouldReturnError) {
             val reminder = reminders.firstOrNull {
                 it.id == id
             }
             if (reminder != null) {
-                return Result.Success(reminder)
+                Result.Success(reminder)
             } else {
-                return Result.Error("Reminder not found!")
+                Result.Error("Reminder not found!")
             }
         } else {
-            return Result.Error("Error, Can't retrieve reminder")
+            Result.Error("Error, Can't retrieve reminder")
         }
     }
 
