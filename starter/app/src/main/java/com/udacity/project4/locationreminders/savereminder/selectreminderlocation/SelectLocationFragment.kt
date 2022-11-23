@@ -52,7 +52,6 @@ class SelectLocationFragment : BaseFragment(), OnMapReadyCallback {
         binding = FragmentSelectLocationBinding.inflate(layoutInflater)
         binding.viewModel = _viewModel
         binding.lifecycleOwner = this
-        fusedLocationClient = LocationServices.getFusedLocationProviderClient(requireContext())
 
         setHasOptionsMenu(true)
         setDisplayHomeAsUpEnabled(true)
@@ -66,12 +65,15 @@ class SelectLocationFragment : BaseFragment(), OnMapReadyCallback {
                 onLocationSelected()
             }
         }
-
         return binding.root
     }
 
     override fun onMapReady(googleMap: GoogleMap) {
         mMap = googleMap
+        mMap.setOnMyLocationButtonClickListener(GoogleMap.OnMyLocationButtonClickListener {
+            checkDeviceLocationSettingsIsEnabled()
+            return@OnMyLocationButtonClickListener false
+        })
         setMapStyle(googleMap)
         setMapLongClick(googleMap)
         setPoiClick(googleMap)
@@ -80,20 +82,29 @@ class SelectLocationFragment : BaseFragment(), OnMapReadyCallback {
 
     private fun getUserLastLocation() {
         mMap.isMyLocationEnabled = true
+        fusedLocationClient = LocationServices.getFusedLocationProviderClient(requireContext())
         fusedLocationClient.lastLocation
-            .addOnSuccessListener { location: Location? ->
-                if (location == null) {
-//                    requestForegroundPermissions()
-                } else {
-                    selectedLocationStr = String.format(
-                        Locale.getDefault(),
-                        "Lat: %1$.5f, Long: %2$.5f",
-                        location.latitude,
-                        location.longitude
-                    )
-                    selectedLocation = LatLng(location.latitude, location.longitude)
-                    mMap.addMarker(MarkerOptions().position(LatLng(location.latitude, location.longitude)))
-                    mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(selectedLocation, 15f))
+            .addOnCompleteListener { task ->
+                if (task.isSuccessful) {
+                    val taskResult = task.result
+                    taskResult?.run {
+                        selectedLocationStr = String.format(
+                            Locale.getDefault(),
+                            "Lat: %1$.5f, Long: %2$.5f",
+                            latitude,
+                            longitude
+                        )
+                        selectedLocation = LatLng(latitude, longitude)
+                        mMap.addMarker(
+                            MarkerOptions().position(
+                                LatLng(
+                                    latitude,
+                                    longitude
+                                )
+                            )
+                        )
+                        mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(selectedLocation, 15f))
+                    }
                 }
             }
     }
@@ -163,7 +174,7 @@ class SelectLocationFragment : BaseFragment(), OnMapReadyCallback {
                     "You can use the API that requires the permission.",
                     Toast.LENGTH_SHORT
                 ).show()
-                checkDeviceLocationSettingsIsEnabled()
+                getUserLastLocation()
             }
             shouldShowRequestPermissionRationale(Manifest.permission.ACCESS_FINE_LOCATION) -> {
                 Snackbar.make(
@@ -216,7 +227,6 @@ class SelectLocationFragment : BaseFragment(), OnMapReadyCallback {
                 ).setAction(android.R.string.ok) {
                     checkDeviceLocationSettingsIsEnabled()
                 }.show()
-                mMap.isMyLocationEnabled = false
             }
         }
         locationSettingsResponseTask.addOnCompleteListener {
@@ -266,7 +276,8 @@ class SelectLocationFragment : BaseFragment(), OnMapReadyCallback {
             }
             if (granted) {
                 Toast.makeText(context, "Permissions is granted", Toast.LENGTH_SHORT).show()
-                checkDeviceLocationSettingsIsEnabled()
+                getUserLastLocation()
+//                checkDeviceLocationSettingsIsEnabled()
             } else {
                 Toast.makeText(context, "Permissions is not granted", Toast.LENGTH_SHORT).show()
                 Snackbar.make(
@@ -274,7 +285,6 @@ class SelectLocationFragment : BaseFragment(), OnMapReadyCallback {
                     "User location can't be shown\ndisable my location button in google maps",
                     Snackbar.LENGTH_INDEFINITE
                 ).show()
-                mMap.isMyLocationEnabled = false
             }
         }
 }
