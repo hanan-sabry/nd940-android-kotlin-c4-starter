@@ -24,10 +24,12 @@ class RemindersLocalRepository(
      * @return Result the holds a Success with all the reminders or an Error object with the error message
      */
     override suspend fun getReminders(): Result<List<ReminderDTO>> = withContext(ioDispatcher) {
-        return@withContext try {
-            Result.Success(remindersDao.getReminders())
-        } catch (ex: Exception) {
-            Result.Error(ex.localizedMessage)
+        wrapEspressoIdlingResource {
+            return@withContext try {
+                Result.Success(remindersDao.getReminders())
+            } catch (ex: Exception) {
+                Result.Error(ex.localizedMessage)
+            }
         }
     }
 

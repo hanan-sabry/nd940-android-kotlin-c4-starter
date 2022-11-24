@@ -54,8 +54,8 @@ class RemindersActivityTest :
     private lateinit var appContext: Application
     private val dataBindingIdlingResource = DataBindingIdlingResource()
 
-//    @get:Rule
-//    var mRuntimePermissionRule: GrantPermissionRule = GrantPermissionRule.grant(Manifest.permission.ACCESS_FINE_LOCATION)
+    @get:Rule
+    var mRuntimePermissionRule: GrantPermissionRule = GrantPermissionRule.grant(Manifest.permission.ACCESS_FINE_LOCATION, Manifest.permission.ACCESS_COARSE_LOCATION)
 
     /**
      * As we use Koin as a Service Locator Library to develop our code, we'll also use Koin to test our code.
