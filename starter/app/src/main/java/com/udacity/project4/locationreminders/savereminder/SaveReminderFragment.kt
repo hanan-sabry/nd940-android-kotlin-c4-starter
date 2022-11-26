@@ -190,7 +190,7 @@ class SaveReminderFragment : BaseFragment() {
 
         geofencingClient.addGeofences(geofencingRequest, geofencePendingIntent)?.run {
             addOnSuccessListener {
-                _viewModel.showToast.value = "Geofence is added"
+//                _viewModel.showToast.value = "Geofence is added"
                 _viewModel.saveReminder(reminderDataItem)
             }
             addOnFailureListener {
@@ -232,8 +232,6 @@ class SaveReminderFragment : BaseFragment() {
     }
 
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
-        super.onActivityResult(requestCode, resultCode, data)
-
         super.onActivityResult(requestCode, resultCode, data)
         if (requestCode == REQUEST_TURN_DEVICE_LOCATION_ON) {
             checkDeviceLocationSettingAndStartGeofence(false)

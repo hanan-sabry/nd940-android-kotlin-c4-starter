@@ -141,7 +141,7 @@ class RemindersActivityTest :
         onView(withId(R.id.reminderDescription)).perform(ViewActions.replaceText("my description"))
         runBlocking { delay(2000) }
         onView(withId(R.id.selectLocation)).perform(click())
-        runBlocking { delay(2000) }
+        runBlocking { delay(4000) }
         onView(withId(R.id.save)).perform(click())
         runBlocking { delay(2000) }
         onView(withId(R.id.saveReminder)).perform(click())
